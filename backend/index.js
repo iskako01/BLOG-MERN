@@ -1,10 +1,13 @@
-const express = require("express");
-const jwt = require("jsonwebtoken");
-const mongoose = require("mongoose");
+import express from "express";
+import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
+import dotenv from "dotenv";
+import { validationResult } from "express-validator";
+import { registerValidation } from "./validations/auth.js";
 
 const app = express();
 
-require("dotenv").config();
+dotenv.config();
 
 const url = process.env.DB_URL;
 const port = process.env.PORT;
@@ -12,16 +15,18 @@ const jwtSecretKey = process.env.JWT_SECRET_KEY;
 
 app.use(express.json());
 
-app.get("/", (req, res) => {
-  res.send("Hi");
-});
-
-app.post("/auth/login", (req, res) => {
+app.post("/auth/register", registerValidation, (req, res) => {
+  const errors = validationResult(req);
   console.log(req.body);
+
+  if (!errors.isEmpty()) {
+    return res.status(400).json(errors.array());
+  }
 
   const token = jwt.sign(
     {
       email: req.body.email,
+      fullName: req.body.fullName,
     },
     jwtSecretKey
   );
