@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import { jwtSecretKey } from "../const.js";
 
 export default (req, res, next) => {
-  const token = req.headers.authorization;
+  const token = (req.headers.authorization || "").replace(/Bearer\s?/, "");
 
   if (token) {
     try {

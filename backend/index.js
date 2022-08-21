@@ -8,7 +8,13 @@ import {
 import checkAuth from "./utils/checkAuth.js";
 import { url, port } from "./const.js";
 import { login, register, getMe } from "./controllers/UserController.js";
-import { createPost } from "./controllers/PostController.js";
+import {
+  createPost,
+  getAllPosts,
+  getOnePost,
+  removePost,
+  updatePost,
+} from "./controllers/PostController.js";
 
 const app = express();
 
@@ -20,11 +26,11 @@ app.post("/auth/register", registerValidation, register);
 app.get("/auth/me", checkAuth, getMe);
 
 //Post
-app.get("/posts");
-app.get("/posts:id");
-app.post("/posts", postValidation, createPost);
-app.delete("/posts");
-app.patch("/posts");
+app.get("/posts", getAllPosts);
+app.get("/posts/:id", getOnePost);
+app.post("/posts", checkAuth, postValidation, createPost);
+app.delete("/posts/:id", checkAuth, removePost);
+app.patch("/posts/:id", checkAuth, updatePost);
 
 app.listen(port, (err) => {
   if (err) {
