@@ -1,22 +1,15 @@
 import express from "express";
 import multer from "multer";
 import mongoose from "mongoose";
+import { UserController, PostController } from "./controllers/index.js";
+import { checkAuth, handleValidationErrors } from "./utils/index.js";
 import {
   loginValidation,
   registerValidation,
   postValidation,
 } from "./validations/validations.js";
-import checkAuth from "./utils/checkAuth.js";
-import handleValidationErrors from "./utils/handleValidationErrors.js";
+
 import { url, port } from "./const.js";
-import { login, register, getMe } from "./controllers/UserController.js";
-import {
-  createPost,
-  getAllPosts,
-  getOnePost,
-  removePost,
-  updatePost,
-} from "./controllers/PostController.js";
 
 const app = express();
 
@@ -35,14 +28,19 @@ app.use(express.json());
 app.use("/uploads", express.static("uploads"));
 
 //Auth
-app.post("/auth/login", loginValidation, handleValidationErrors, login);
+app.post(
+  "/auth/login",
+  loginValidation,
+  handleValidationErrors,
+  UserController.login
+);
 app.post(
   "/auth/register",
   registerValidation,
   handleValidationErrors,
-  register
+  UserController.register
 );
-app.get("/auth/me", handleValidationErrors, checkAuth, getMe);
+app.get("/auth/me", handleValidationErrors, checkAuth, UserController.getMe);
 
 //Upload image
 app.post("/upload", checkAuth, upload.single("image"), (req, res) => {
@@ -52,17 +50,22 @@ app.post("/upload", checkAuth, upload.single("image"), (req, res) => {
 });
 
 //Post
-app.get("/posts", getAllPosts);
-app.get("/posts/:id", getOnePost);
+app.get("/posts", PostController.getAllPosts);
+app.get("/posts/:id", PostController.getOnePost);
 app.post(
   "/posts",
   checkAuth,
   postValidation,
   handleValidationErrors,
-  createPost
+  PostController.createPost
 );
-app.delete("/posts/:id", checkAuth, removePost);
-app.patch("/posts/:id", checkAuth, handleValidationErrors, updatePost);
+app.delete("/posts/:id", checkAuth, PostController.removePost);
+app.patch(
+  "/posts/:id",
+  checkAuth,
+  handleValidationErrors,
+  PostController.updatePost
+);
 
 app.listen(port, (err) => {
   if (err) {
